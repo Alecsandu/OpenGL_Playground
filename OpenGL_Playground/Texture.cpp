@@ -11,7 +11,7 @@ Texture::Texture() : m_texture_id(0)
 Texture::Texture(const char* ruta_fisier_dds)
 {
 	m_texture_id = 0;
-	unsigned char header[124];
+	unsigned char header[124] = { 0 };
 
 	FILE* fp;
 

@@ -8,9 +8,8 @@
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
 #include "ShaderLoader.hpp"
-#include "VertexBufferLayout.hpp"
-#include "Texture.hpp"
-#include "IndexBuffer.hpp"
+//#include "Texture.hpp"
+#include "ElementsBuffer.hpp"
 #include "ObjectLoader.hpp"
 #include "WindowingSystem.hpp"
 #include "Generators.hpp"
@@ -49,7 +48,7 @@ void app()
 
     VertexArray va(1);
     va.Bind();
-    VertexBuffer vb(varfuri.data(), sizeof(glm::vec3) * varfuri.size());
+    VertexBuffer vb(varfuri);
     vb.Bind();
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
@@ -89,7 +88,7 @@ void app()
     va.Unbind();
     va.cleanup();
     vb.Unbind();
-    vb.cleanup();
+    vb.Delete();
     sh.Unbind();
     sh.cleanup();
 }

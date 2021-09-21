@@ -1,21 +1,21 @@
 #pragma once
 #include <GL/glew.h>
+#include "glm.hpp"
+#include <vector>
 
 class VertexBuffer
 {
 public:
-	VertexBuffer(const void*, unsigned int);
+	VertexBuffer(std::vector<glm::vec3>& vertices);//GLfloat* vertices, GLsizeiptr size);
 	~VertexBuffer();
 
-	void cleanup();
-
-	unsigned int getDataSize() const;
 	unsigned int getBufferID() const;
 
 	void Bind() const;
 	void Unbind() const;
+	void Delete();
+
 private:
-	unsigned int m_v_buffer_id;
-	unsigned int m_data_size;
+	unsigned int m_vbo_id;
 };
 

@@ -17,21 +17,18 @@ Generators::~Generators()
 
 std::vector<glm::vec3> Generators::generatePoint()
 {
-    /*std::vector<glm::vec3> varfuri = {
-        glm::vec3(-0.5f, 0.5f * float(sqrt(3)) / 3,     0.0f),
-        glm::vec3(0.5f,  0.5f * float(sqrt(3)) / 3,     0.0f),
-        glm::vec3(0.0f, -0.5f * float(sqrt(3)) * 2 / 3, 0.0f)
-    };*/
-
     std::vector<glm::vec3> varfuri;
+
+    /* Initialize distributions */
     std::uniform_real_distribution<double> distribution1(-0.7, 0.7);
     std::uniform_real_distribution<double> distribution2(0.4, 0.7);
     std::uniform_real_distribution<double> distribution3(0.1, 0.5 * pi);
 
+    /* Generate random circle center positions */
     double pos_x = distribution1(generator);
     double pos_y = distribution1(generator);
     double pos_z = distribution1(generator);
-    glm::vec3 centre_point = { pos_x, pos_y, pos_z};   // Centrul cercului
+    glm::vec3 centre_point = { pos_x, pos_y, pos_z};   
 
     double radius = distribution2(generator);
 

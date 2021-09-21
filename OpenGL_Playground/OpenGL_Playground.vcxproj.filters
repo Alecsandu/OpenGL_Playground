@@ -21,9 +21,6 @@
     <ClCompile Include="WindowingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VertexBufferLayout.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="VertexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,10 +36,7 @@
     <ClCompile Include="ObjectLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="IndexBuffer.cpp">
+    <ClCompile Include="ElementsBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Controls.cpp">
@@ -54,9 +48,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowingSystem.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VertexBufferLayout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VertexBuffer.hpp">
@@ -71,13 +62,10 @@
     <ClInclude Include="ShaderLoader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ObjectLoader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IndexBuffer.hpp">
+    <ClInclude Include="ElementsBuffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Controls.hpp">
