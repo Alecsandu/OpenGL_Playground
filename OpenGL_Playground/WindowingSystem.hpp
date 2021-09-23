@@ -20,6 +20,8 @@ public:
 	GLFWwindow* getWindow() const;
 	void setWindow(GLFWwindow&);
 
+	void Delete();
+
 private:
 	int m_client_width;
 	int m_client_height;

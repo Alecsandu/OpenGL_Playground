@@ -1,12 +1,12 @@
-#include "ShaderLoader.hpp"
+#include "Shader.hpp"
 
-ShaderLoader::ShaderLoader() 
+Shader::Shader()
 {
 	m_flag_shader = false;
 	m_program_id = 0;
 }
 
-ShaderLoader::ShaderLoader(const std::string& vertex_file_path, const std::string& fragment_file_path)
+Shader::Shader(const std::string& vertex_file_path, const std::string& fragment_file_path)
 {
 	m_flag_shader = true;
 	std::string vertex_shader_code = read_file(vertex_file_path);
@@ -18,48 +18,48 @@ ShaderLoader::ShaderLoader(const std::string& vertex_file_path, const std::strin
 		std::cout << "\nThe shaders were compiled succesfully!\n";
 }
 
-ShaderLoader::~ShaderLoader()
+Shader::~Shader()
 {
 }
 
-void ShaderLoader::cleanup()
+void Shader::Bind() const
+{
+	glUseProgram(m_program_id);
+}
+
+void Shader::Unbind() const
+{
+	glUseProgram(0);
+}
+
+void Shader::Delete()
 {
 	m_flag_shader = false;
 	if (m_program_id != 0)
 		glDeleteProgram(m_program_id);
 }
 
-void ShaderLoader::Bind() const
-{
-	glUseProgram(m_program_id);
-}
-
-void ShaderLoader::Unbind() const
-{
-	glUseProgram(0);
-}
-
-void ShaderLoader::set_uniform_4f(const std::string& name, float v0, float v1, float v2, float v3)
+void Shader::set_uniform_4f(const std::string& name, float v0, float v1, float v2, float v3)
 {
 	glUniform4f(get_uniform_location(name), v0, v1, v2, v3);
 }
 
-void ShaderLoader::set_uniform_matrix_4fv(const std::string& name, glm::mat4 matr)
+void Shader::set_uniform_matrix_4fv(const std::string& name, glm::mat4 matr)
 {
 	glUniformMatrix4fv(get_uniform_location(name), 1, GL_FALSE, &matr[0][0]);
 }
 
-void ShaderLoader::set_uniform_1i(const std::string& name, int v)
+void Shader::set_uniform_1i(const std::string& name, int v)
 {
 	glUniform1i(get_uniform_location(name), v);
 }
 
-unsigned int ShaderLoader::getProgramId()
+unsigned int Shader::getProgramId()
 {
 	return this->m_program_id;
 }
 
-std::string ShaderLoader::read_file(const std::string& file_path)
+std::string Shader::read_file(const std::string& file_path)
 {
 	std::ifstream f_in(file_path, std::ios::in);
 
@@ -77,7 +77,7 @@ std::string ShaderLoader::read_file(const std::string& file_path)
 	return buffer.str();
 }
 
-unsigned int ShaderLoader::compile_shader(unsigned int type, const std::string& source)
+unsigned int Shader::compile_shader(unsigned int type, const std::string& source)
 {
 	// creez un obiect shader gol, care va primii cod si va fi compilat
 	unsigned int compiled_shader = glCreateShader(type);
@@ -107,7 +107,7 @@ unsigned int ShaderLoader::compile_shader(unsigned int type, const std::string& 
 	return compiled_shader;
 }
 
-bool ShaderLoader::create_shaders(const std::string& vertex_shader, const std::string& fragment_shader)
+bool Shader::create_shaders(const std::string& vertex_shader, const std::string& fragment_shader)
 {
 	unsigned int vs = compile_shader(GL_VERTEX_SHADER, vertex_shader);
 	unsigned int fs = compile_shader(GL_FRAGMENT_SHADER, fragment_shader);
@@ -143,7 +143,7 @@ bool ShaderLoader::create_shaders(const std::string& vertex_shader, const std::s
 	return true;
 }
 
-unsigned int ShaderLoader::get_uniform_location(const std::string& name)
+unsigned int Shader::get_uniform_location(const std::string& name)
 {
 	unsigned int location = glGetUniformLocation(m_program_id, name.c_str());
 	if (location == -1)

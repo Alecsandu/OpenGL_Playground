@@ -2,13 +2,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "glm.hpp"
+#include <stb_image.h>
 
 /* My classes */
 #include "Controls.hpp"
 #include "VertexArray.hpp"
 #include "VertexBuffer.hpp"
-#include "ShaderLoader.hpp"
-//#include "Texture.hpp"
+#include "Shader.hpp"
+#include "Texture.hpp"
 #include "ElementsBuffer.hpp"
 #include "ObjectLoader.hpp"
 #include "WindowingSystem.hpp"
@@ -17,6 +18,8 @@
 /* Standard libs */
 #include <errno.h>
 #include <vector>
+#include<filesystem>
+namespace fs = std::filesystem;
 
 void app()
 {
@@ -33,50 +36,43 @@ void app()
         throw std::exception("Failed to initialize GLEW!");
     }
 
-    glViewport(0, 0, 1920, 1080);
-
-    Generators gen;
-
-    std::vector<glm::vec3> varfuri = {
-        glm::vec3(-0.5f, -0.5f * float(sqrt(3)) / 3,     0.0f),
-        glm::vec3( 0.5f, -0.5f * float(sqrt(3)) / 3,     0.0f),
-        glm::vec3( 0.0f,  0.5f * float(sqrt(3)) * 2 / 3, 0.0f)
+    std::vector<Vertex> varfuri = {
+        Vertex { glm::vec3{-0.5f, -0.5f, 0.0f},   glm::vec3{0.0f, 0.0f, 0.0f},   glm::vec3{1.0f, 0.0f, 0.0f},	glm::vec2{0.0f, 0.0f} }, // Lower left corner
+        Vertex { glm::vec3{-0.5f,  0.5f, 0.0f},   glm::vec3{0.0f, 0.0f, 0.0f},   glm::vec3{0.0f, 1.0f, 0.0f},	glm::vec2{0.0f, 1.0f} }, // Upper left corner
+        Vertex { glm::vec3{ 0.5f,  0.5f, 0.0f},   glm::vec3{0.0f, 0.0f, 0.0f},   glm::vec3{0.0f, 0.0f, 1.0f},	glm::vec2{1.0f, 1.0f} }, // Upper right corner
+        Vertex { glm::vec3{ 0.5f, -0.5f, 0.0f},   glm::vec3{0.0f, 0.0f, 0.0f},   glm::vec3{1.0f, 1.0f, 1.0f},	glm::vec2{1.0f, 0.0f} }  // Lower right corner
     };
 
-    std::cout << sizeof(varfuri) << " " << sizeof(GLfloat) << " " << sizeof(glm::vec3) << " " << varfuri.size();
-    ShaderLoader sh("vertex_shader.vert", "fragment_shader.frag");
+    Shader sh("Shaders/vertex_shader.vert", "Shaders/fragment_shader.frag");
+    Texture texture("Resources/pop_cat.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    texture.texUnit(sh, "tex0", 0);
 
-    VertexArray va(1);
+    VertexArray va;
     va.Bind();
     VertexBuffer vb(varfuri);
     vb.Bind();
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
-    glEnableVertexAttribArray(0);
+    va.linkAttrib(vb, 0, 3, GL_FLOAT, sizeof(Vertex), (void*)(0));
+    va.linkAttrib(vb, 1, 3, GL_FLOAT, sizeof(Vertex), (void*)(3 * sizeof(float)));
+    va.linkAttrib(vb, 2, 3, GL_FLOAT, sizeof(Vertex), (void*)(6 * sizeof(float)));
+    va.linkAttrib(vb, 3, 2, GL_FLOAT, sizeof(Vertex), (void*)(9 * sizeof(float)));
 
     vb.Unbind();
     va.Unbind();
-    int nr = 0;
+
     sh.Bind();
     while (!glfwWindowShouldClose(ws.getWindow()))
     {
-        nr++;
         glClearColor(0.0f, 0.13f, 0.17f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         vb.Bind();
         va.Bind();
+        texture.Bind();
         
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
-        if (nr == 250) {
-            varfuri.clear();
-            varfuri = gen.generatePoint();
-            nr = 0;
-        }
-
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * varfuri.size(), varfuri.data(), GL_STATIC_DRAW);
-
+        texture.Unbind();
         va.Unbind();
         vb.Unbind();
         
@@ -84,13 +80,15 @@ void app()
         glfwPollEvents();
     }
 
+    ws.Delete();
     glfwTerminate();
+
     va.Unbind();
-    va.cleanup();
+    va.Delete();
     vb.Unbind();
     vb.Delete();
     sh.Unbind();
-    sh.cleanup();
+    sh.Delete();
 }
 
 int main()

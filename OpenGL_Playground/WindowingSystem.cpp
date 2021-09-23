@@ -1,5 +1,4 @@
 #include "WindowingSystem.hpp"
-#include "SOIL2.h"
 
 WindowingSystem::WindowingSystem(const std::string& title, const std::string& icon_path, unsigned int width, unsigned int height) : m_window_title(title)
 {
@@ -18,22 +17,20 @@ WindowingSystem::WindowingSystem(const std::string& title, const std::string& ic
 	if (!m_window)
 	{
 		glfwTerminate();
-		throw std::exception("Bruh the window failed to be created!\n");
+		throw std::exception("The window failed to be created!\n");
 	}
 
-	if (icon_path != "")
+	/*if (icon_path != "")
 	{
 		GLFWimage icons[1] = {};
 		icons[0].pixels = SOIL_load_image(icon_path.c_str(), &icons[0].width, &icons[0].height, 0, SOIL_LOAD_RGBA);
 		glfwSetWindowIcon(m_window, 1, icons);
 		SOIL_free_image_data(icons[0].pixels);
-	}
+	}*/
 }
 
 WindowingSystem::~WindowingSystem()
-{
-	glfwDestroyWindow(m_window);
-}
+{}
 
 int WindowingSystem::getScreenWidth() const
 {
@@ -63,4 +60,9 @@ GLFWwindow* WindowingSystem::getWindow() const
 void WindowingSystem::setWindow(GLFWwindow& new_window)
 {
 	this->m_window = &new_window;
+}
+
+void WindowingSystem::Delete()
+{
+	glfwDestroyWindow(m_window);
 }

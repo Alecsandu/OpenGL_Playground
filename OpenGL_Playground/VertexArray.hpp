@@ -1,23 +1,22 @@
 #pragma once
 #include <GL/glew.h>
-#include "VertexBuffer.hpp"
-#include "VertexBufferLayout.hpp"
+
+class VertexBuffer;
 
 class VertexArray
 {
 public:
 	VertexArray();
-	VertexArray(unsigned int);
-	VertexArray(const VertexArray&);
 	~VertexArray();
 
-	void cleanup();
+	void linkAttrib(VertexBuffer& vbo, GLuint layout, GLuint numComponents, GLenum type, GLsizei stride, void* offset);
 
 	void Bind() const;
 	void Unbind() const;
+	void Delete();
 
-	unsigned int getVertexArrayId();
+	unsigned int getVertexArrayId() const;
+
 private:
 	unsigned int m_vertex_array_id;
-	unsigned int m_size;
 };

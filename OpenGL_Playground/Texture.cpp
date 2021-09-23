@@ -1,129 +1,73 @@
 #include "Texture.hpp"
+#include "Shader.hpp"
 #include <iostream>
 
-#define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1" in ASCII
-#define FOURCC_DXT3 0x33545844 // Equivalent to "DXT3" in ASCII
-#define FOURCC_DXT5 0x35545844 // Equivalent to "DXT5" in ASCII
-
-Texture::Texture() : m_texture_id(0)
-{}
-
-Texture::Texture(const char* ruta_fisier_dds)
+Texture::Texture(const char* image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType)
 {
-	m_texture_id = 0;
-	unsigned char header[124] = { 0 };
+	// Assigns the type of the texture ot the texture object
+	type = texType;
 
-	FILE* fp;
+	// Stores the width, height, and the number of color channels of the image
+	int widthImg, heightImg, numColCh;
+	// Flips the image so it appears right side up
+	stbi_set_flip_vertically_on_load(true);
+	// Reads the image from a file and stores it in bytes
+	unsigned char* bytes = stbi_load(image, &widthImg, &heightImg, &numColCh, 0);
 
-	/* try to open the file */
-	fp = fopen(ruta_fisier_dds, "rb");
-	if (fp == NULL) {
-		printf("%s nu a putut fi deschis. Verificati daca fisierele se afla in folderul corect!\n", ruta_fisier_dds);
-		return;
-	}
+	// Generates an OpenGL texture object
+	glGenTextures(1, &ID);
+	// Assigns the texture to a Texture Unit
+	glActiveTexture(slot);
+	glBindTexture(texType, ID);
 
-	/* verify the type of file */
-	char filecode[4] = { 0 };
-	fread(filecode, 1, 4, fp);
-	if (strncmp(filecode, "DDS ", 4) != 0) {
-		fclose(fp);
-		return;
-	}
+	// Configures the type of algorithm that is used to make the image smaller or bigger
+	glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-	/* get the surface desc */
-	fread(header, 124, 1, fp);
+	// Configures the way the texture repeats (if it does at all)
+	glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	unsigned int height = *(unsigned int*)&(header[8]);
-	unsigned int width = *(unsigned int*)&(header[12]);
-	unsigned int linearSize = *(unsigned int*)&(header[16]);
-	unsigned int mipMapCount = *(unsigned int*)&(header[24]);
-	unsigned int fourCC = *(unsigned int*)&(header[80]);
+	// Extra lines in case you choose to use GL_CLAMP_TO_BORDER
+	// float flatColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+	// glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, flatColor);
 
-	unsigned char* buffer;
-	unsigned int bufsize;
-	/* how big is it going to be including all mipmaps? */
-	bufsize = mipMapCount > 1 ? linearSize * 2 : linearSize;
-	buffer = (unsigned char*)malloc(bufsize * sizeof(unsigned char));
-	fread(buffer, 1, bufsize, fp);
-	/* close the file pointer */
-	fclose(fp);
+	// Assigns the image to the OpenGL Texture object
+	glTexImage2D(texType, 0, GL_RGBA, widthImg, heightImg, 0, format, pixelType, bytes);
+	// Generates MipMaps
+	glGenerateMipmap(texType);
 
-	unsigned int components = (fourCC == FOURCC_DXT1) ? 3 : 4;
-	unsigned int format;
-	switch (fourCC)
-	{
-	case FOURCC_DXT1:
-		format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-		break;
-	case FOURCC_DXT3:
-		format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-		break;
-	case FOURCC_DXT5:
-		format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-		break;
-	default:
-		free(buffer);
-		return;
-	}
+	// Deletes the image data as it is already in the OpenGL Texture object
+	stbi_image_free(bytes);
 
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-
-	// "Bind" the newly created texture : all future texture functions will modify this texture
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	unsigned int blockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
-	unsigned int offset = 0;
-
-	/* incarac mipmaps */
-	for (unsigned int level = 0; level < mipMapCount && (width || height); ++level)
-	{
-		unsigned int size = ((width + 3) / 4) * ((height + 3) / 4) * blockSize;
-		glCompressedTexImage2D(GL_TEXTURE_2D, level, format, width, height,
-			0, size, buffer + offset);
-
-		offset += size;
-		width /= 2;
-		height /= 2;
-
-		// pentru texturile care nu au dimensiuni care nu se impart la 2
-		if (width < 1)
-			width = 1;
-		if (height < 1)
-			height = 1;
-	}
-	free(buffer);
-	
-	m_texture_id = textureID;
+	// Unbinds the OpenGL Texture object so that it can't accidentally be modified
+	glBindTexture(texType, 0);
 }
 
 Texture::~Texture()
 {
 }
 
-void Texture::cleanup()
+void Texture::texUnit(Shader& shader, const char* uniform, GLuint unit)
 {
-	glDeleteTextures(1, &m_texture_id);
-}
-
-void Texture::setTexture(unsigned int tex)
-{
-	this->m_texture_id = tex;
-}
-
-unsigned int Texture::getTexture()
-{
-	return this->m_texture_id;
+	GLuint texUnit = glGetUniformLocation(shader.getProgramId(), uniform);
+	// Shader needs to be activated before changing the value of a uniform
+	shader.Bind();
+	// Sets the value of the uniform
+	glUniform1i(texUnit, unit);
 }
 
 void Texture::Bind() const
 {
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_texture_id);
+	glBindTexture(GL_TEXTURE_2D, ID);
 }
 
 void Texture::Unbind() const
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::Delete()
+{
+	glDeleteTextures(1, &ID);
 }

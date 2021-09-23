@@ -1,10 +1,10 @@
 #include "VertexBuffer.hpp"
 
-VertexBuffer::VertexBuffer(std::vector<glm::vec3>& vertices)
+VertexBuffer::VertexBuffer(std::vector<Vertex>& vertices)
 {
 	glGenBuffers(1, &m_vbo_id);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_id);  // Bind the buffer in order to save the data in it
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0); 
 }
 

@@ -4,22 +4,24 @@
 #include <string.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <stb_image.h>
+
+class Shader;
 
 class Texture
 {
 public:
-	Texture();
-	Texture(const char*);
+	Texture(const char* image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType);
 	~Texture();
 
-	void cleanup();
-
-	void setTexture(unsigned int);
-	unsigned int getTexture();
+	// Assigns a texture unit to a texture
+	void texUnit(Shader& shader, const char* uniform, GLuint unit);
 
 	void Bind() const;
 	void Unbind() const;
+	void Delete();
 
 private:
-	unsigned int m_texture_id;
+	GLuint ID;
+	GLenum type;
 };
